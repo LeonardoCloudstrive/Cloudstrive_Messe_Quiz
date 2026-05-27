@@ -136,9 +136,11 @@ p { line-height: 1.6; }
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 48px 32px;
+  padding: clamp(20px, 5vh, 48px) 32px;
+  gap: clamp(10px, 2vh, 24px);
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 #screen-welcome::before {
@@ -154,7 +156,6 @@ p { line-height: 1.6; }
 }
 
 .welcome-logo {
-  margin-bottom: 32px;
   position: relative;
   z-index: 1;
 }
@@ -199,7 +200,6 @@ p { line-height: 1.6; }
   letter-spacing: 0.04em;
   padding: 8px 16px;
   border-radius: 100px;
-  margin-bottom: 28px;
   position: relative;
   z-index: 1;
 }
@@ -220,11 +220,10 @@ p { line-height: 1.6; }
 
 .welcome-title {
   font-family: var(--font-heading);
-  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-size: clamp(1.8rem, min(5vw, 5.5vh), 3.5rem);
   font-weight: 700;
   letter-spacing: 0.01em;
   line-height: 1.05;
-  margin-bottom: 20px;
   position: relative;
   z-index: 1;
 }
@@ -237,7 +236,7 @@ p { line-height: 1.6; }
   color: var(--text-muted);
   font-size: 1.05rem;
   max-width: 420px;
-  margin: 0 auto 40px;
+  margin: 0 auto;
   position: relative;
   z-index: 1;
 }
@@ -258,11 +257,10 @@ p { line-height: 1.6; }
 
 .hero-bubbles {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   justify-content: center;
   flex-wrap: wrap;
   max-width: 480px;
-  margin-top: 40px;
   position: relative;
   z-index: 1;
 }
@@ -275,6 +273,12 @@ p { line-height: 1.6; }
   font-size: 0.78rem;
   color: rgba(255,255,255,0.5);
   white-space: nowrap;
+}
+
+/* Hide bubbles when viewport is too short to fit them */
+@media (max-height: 700px) {
+  .hero-bubbles { display: none; }
+  .welcome-sub  { font-size: 0.9rem; }
 }
 
 /* ============================================================
