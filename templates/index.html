@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0A1628" />
+  <title>Welcher KI-Verwaltungsheld sind Sie? – Cloudstrive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- ============================================================
+       Screen 1 — Welcome
+       ============================================================ -->
+  <div class="screen" id="screen-welcome">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:48px 32px;text-align:center;position:relative;z-index:1;">
+
+      <div class="welcome-logo">
+        <div class="cs-logo-wrapper">
+          {{ logo_svg | safe }}
+        </div>
+      </div>
+
+      <div class="welcome-badge">
+        Fachmesse Digitale Verwaltung · 16.–17. Juni 2026 · Energiepark Hirschaid
+      </div>
+
+      <h1 class="welcome-title">
+        Welcher<br>
+        <span class="highlight">KI-Verwaltungsheld</span><br>
+        sind Sie?
+      </h1>
+
+      <p class="welcome-sub">
+        Sieben Fragen. Ihr persönliches Heldenportrait. Gedruckt zum Mitnehmen.
+      </p>
+
+      <div class="welcome-cta">
+        <button class="btn btn-primary btn-xl" id="btn-start">Jetzt starten →</button>
+        <p class="welcome-hint">ca. 2–3 Minuten</p>
+      </div>
+
+      <div class="hero-bubbles">
+        <span class="hero-bubble">🚀 KI-Pionier:in</span>
+        <span class="hero-bubble">🛡️ Compliance-Wächter:in</span>
+        <span class="hero-bubble">✨ Automatisierungs-Magier:in</span>
+        <span class="hero-bubble">🔍 Daten-Detektiv:in</span>
+        <span class="hero-bubble">⚡ Transformations-Leader:in</span>
+        <span class="hero-bubble">🤝 Change-Coach:in</span>
+        <span class="hero-bubble">🏗️ Prozess-Architekt:in</span>
+        <span class="hero-bubble">🌟 Allrounder-Held:in</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       Screen 2 — Quiz
+       ============================================================ -->
+  <div class="screen" id="screen-quiz">
+    <div class="quiz-header">
+      <div class="quiz-top-row">
+        <span class="quiz-label">Ihr Persönlichkeits-Check</span>
+        <span class="question-counter" id="q-counter">Frage 1 von 7</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="q-progress" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="quiz-body">
+      <div class="question-viewport" id="question-viewport">
+        <!-- Question cards injected by quiz.js -->
+      </div>
+    </div>
+
+    <div class="quiz-footer">
+      <button class="btn btn-secondary" id="btn-q-back">← Zurück</button>
+      <button class="btn btn-primary" id="btn-q-next">Weiter →</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       Screen 3 — Lead Form
+       ============================================================ -->
+  <div class="screen" id="screen-form">
+    <div class="form-header">
+      <h2>Fast geschafft!</h2>
+      <p>Damit wir Ihren Helden erschaffen und drucken können:</p>
+    </div>
+
+    <div class="form-body">
+      <div class="form-group">
+        <label for="f-name">Name *</label>
+        <input type="text" id="f-name" placeholder="Ihr vollständiger Name" autocomplete="name" />
+      </div>
+
+      <div class="form-group">
+        <label for="f-email">E-Mail *</label>
+        <input type="email" id="f-email" placeholder="ihre@email.de" autocomplete="email" />
+      </div>
+
+      <div class="form-group">
+        <label for="f-institut">Institut / Organisation</label>
+        <input type="text" id="f-institut" placeholder="z.B. Fraunhofer-Institut XY" autocomplete="organization" />
+      </div>
+
+      <div class="form-group">
+        <label>Wie möchten Sie dargestellt werden?</label>
+        <div class="gender-toggle">
+          <button type="button" class="gender-btn" data-gender="weiblich">weiblich</button>
+          <button type="button" class="gender-btn" data-gender="maennlich">männlich</button>
+          <button type="button" class="gender-btn active" data-gender="neutral">neutral</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="checkbox-row">
+          <input type="checkbox" id="f-gdpr" />
+          <label for="f-gdpr">
+            Ich bin damit einverstanden, dass Cloudstrive mich zu KI-Lösungen für die öffentliche Verwaltung
+            kontaktiert. Meine Daten werden nicht an Dritte weitergegeben.
+            <a href="https://cloudstrive.ai/datenschutz" target="_blank" rel="noopener">Datenschutzerklärung</a> *
+          </label>
+        </div>
+      </div>
+
+      <p style="font-size:0.75rem;color:var(--text-muted);line-height:1.5;margin-top:4px;">
+        🔒 Ihr Foto wird ausschließlich zur Heldenerstellung verwendet und danach sofort gelöscht.
+        Nur Ihre Kontaktdaten werden mit Ihrer Einwilligung gespeichert.
+      </p>
+    </div>
+
+    <div class="form-footer">
+      <button class="btn btn-primary btn-full btn-lg" id="btn-form-next">Weiter zum Foto →</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       Screen 4 — Camera
+       ============================================================ -->
+  <div class="screen" id="screen-camera">
+    <div class="camera-header">
+      <h2>Ihr Gesicht für den Helden</h2>
+      <p>Positionieren Sie Ihr Gesicht in der Mitte</p>
+    </div>
+
+    <div class="dsgvo-banner">
+      <span class="icon">🔒</span>
+      <p>DSGVO-Hinweis: Ihr Foto wird nur zur Bildgenerierung verwendet und danach sofort gelöscht. Keine dauerhafte Speicherung.</p>
+    </div>
+
+    <!-- Live camera view -->
+    <div id="camera-live-area" class="camera-viewport">
+      <video id="camera-video" autoplay playsinline muted></video>
+      <div class="camera-guide">
+        <div class="face-oval"></div>
+      </div>
+    </div>
+
+    <!-- Preview after capture -->
+    <div id="camera-preview-area" class="camera-viewport hidden" style="display:none">
+      <img id="camera-preview" alt="Ihr Foto" style="width:100%;height:100%;object-fit:cover;display:block;transform:scaleX(-1);" />
+      <div class="preview-badge">Foto bestätigen?</div>
+    </div>
+
+    <!-- No camera fallback -->
+    <div id="no-camera-fallback" class="hidden" style="display:none;flex:1;margin:0 28px;background:var(--dark-2);border-radius:var(--radius-lg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;min-height:200px;">
+      <span style="font-size:3rem">📷</span>
+      <p style="color:var(--text-muted);text-align:center;padding:0 24px;font-size:0.9rem">Kein Kamerazugriff möglich.<br>Sie können den Quiz trotzdem fortsetzen.</p>
+      <button class="btn btn-primary" id="btn-skip-fallback">Ohne Foto fortfahren</button>
+    </div>
+
+    <canvas id="canvas-hidden"></canvas>
+
+    <!-- Capture controls -->
+    <div id="camera-capture-controls" class="camera-controls">
+      <button class="btn btn-secondary" onclick="App.showScreen('screen-form')">← Zurück</button>
+      <button class="btn-capture" id="btn-capture" aria-label="Foto aufnehmen"></button>
+      <button class="btn btn-ghost" id="btn-skip-photo" style="font-size:0.85rem">Überspringen</button>
+    </div>
+
+    <!-- Confirm controls (after capture) -->
+    <div id="camera-confirm-controls" class="camera-controls hidden" style="display:none">
+      <button class="btn btn-secondary" id="btn-retake">↩ Nochmal</button>
+      <button class="btn btn-primary btn-lg" id="btn-confirm-photo">Weiter → Held erstellen</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       Screen 5 — Loading
+       ============================================================ -->
+  <div class="screen" id="screen-loading">
+    <div class="loading-orb-wrapper">
+      <div class="loading-orb">
+        <div class="loading-orb-inner">🎨</div>
+      </div>
+    </div>
+
+    <div>
+      <p class="loading-title">Die KI erschafft<br>Ihren Helden</p>
+      <p class="loading-subtitle" style="margin-top:8px">Bitte einen Moment Geduld …</p>
+    </div>
+
+    <div class="loading-dots">
+      <span></span><span></span><span></span>
+    </div>
+
+    <div class="loading-steps">
+      <div class="loading-step" id="step-analyzing">
+        <div class="step-icon">1</div>
+        Persönlichkeit wird analysiert …
+      </div>
+      <div class="loading-step" id="step-selecting">
+        <div class="step-icon">2</div>
+        Helden-Typ wird ermittelt …
+      </div>
+      <div class="loading-step" id="step-painting">
+        <div class="step-icon">3</div>
+        Heldenbild wird gemalt …
+      </div>
+      <div class="loading-step" id="step-finishing">
+        <div class="step-icon">4</div>
+        Letzte Details werden verfeinert …
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       Screen 6 — Result
+       ============================================================ -->
+  <div class="screen" id="screen-result">
+    <div class="result-bg-glow" id="result-bg-glow"></div>
+
+    <div class="result-header">
+      <p class="result-eyebrow">Ihr Ergebnis</p>
+      <p class="result-title">Herzlichen Glückwunsch!</p>
+    </div>
+
+    <div class="result-card">
+      <div class="hero-image-container" id="hero-image-container">
+        <!-- Populated by result.js -->
+      </div>
+
+      <div class="hero-info">
+        <div class="hero-dimension-badge" id="result-dimension-badge">⭐ Dimension</div>
+        <h2 class="hero-name" id="result-name">Ihr Heldenname</h2>
+        <p class="hero-motto" id="result-motto"></p>
+        <p class="hero-description" id="result-description"></p>
+      </div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-primary btn-xl btn-full" id="btn-print">🖨️ Postkarte drucken</button>
+      <button class="btn btn-secondary btn-full" id="btn-restart">↩ Neu starten</button>
+    </div>
+  </div>
+
+</div><!-- /#app -->
+
+<!-- ============================================================
+     Hidden Print Postcard — only visible when printing
+     ============================================================ -->
+<div id="print-postcard" class="print-only">
+  <div class="print-image-area">
+    <img id="print-hero-image" src="" alt="Ihr Heldenbild" />
+  </div>
+  <div class="print-content-area">
+    <div class="print-hero-name" id="print-hero-name"></div>
+    <div class="print-motto" id="print-hero-motto"></div>
+  </div>
+  <div class="print-footer">
+    <span class="print-logo-text">cloudstrive</span>
+    <div class="print-qr" id="print-qr-container"></div>
+    <p class="print-tagline">Ihr KI-Sparringspartner<br>für die Verwaltung von morgen.</p>
+  </div>
+</div>
+
+<!-- Theme toggle button — always on top -->
+<button class="theme-toggle" id="theme-toggle" aria-label="Hell-/Dunkel-Modus wechseln">
+  <span id="theme-icon">☀️</span>
+</button>
+
+<!-- Hidden toggle helper for camera screens -->
+<style>
+  .hidden { display: none !important; }
+</style>
+
+<!-- QR Code library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- App scripts -->
+<script src="/static/js/app.js"></script>
+<script src="/static/js/quiz.js"></script>
+<script src="/static/js/camera.js"></script>
+<script src="/static/js/result.js"></script>
+</body>
+</html>

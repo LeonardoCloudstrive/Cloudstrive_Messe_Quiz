@@ -1,0 +1,314 @@
+/* ============================================================
+   Display CSS — TV big-screen layout
+   Optimised for 1920×1080 / 16:9, dark background
+   ============================================================ */
+
+:root {
+  --primary:   #1E5AFF;
+  --dark:      #0A1628;
+  --dark-2:    #112038;
+  --hero-color: #1E5AFF;
+  --font-heading: 'Oswald', 'Impact', sans-serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--dark);
+  color: #fff;
+  font-family: var(--font-body);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   Layer system — fade between video and result
+   ============================================================ */
+.layer {
+  position: fixed;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 800ms ease;
+}
+
+.layer.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ============================================================
+   Video / idle layer
+   ============================================================ */
+#layer-video { background: #000; }
+
+#promo-video {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Idle fallback (shown when no video file) ── */
+.idle-fallback {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  text-align: center;
+  padding: 60px;
+  background: var(--dark);
+  overflow: hidden;
+}
+
+.idle-fallback.visible { display: flex; }
+
+.idle-glow {
+  position: absolute;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px; height: 900px;
+  background: radial-gradient(circle, rgba(30,90,255,0.18) 0%, transparent 65%);
+  animation: idle-pulse 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes idle-pulse {
+  0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+  50%       { opacity: 1;   transform: translateX(-50%) scale(1.15); }
+}
+
+.idle-logo-svg svg {
+  height: 56px;
+  width: auto;
+}
+
+.idle-headline {
+  font-family: var(--font-heading);
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.idle-highlight { color: var(--primary); }
+
+.idle-sub {
+  font-size: 1.4rem;
+  color: rgba(255,255,255,0.5);
+}
+
+.idle-bubbles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  max-width: 900px;
+}
+
+.idle-bubbles span {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 100px;
+  padding: 8px 20px;
+  font-size: 1rem;
+  color: rgba(255,255,255,0.55);
+  animation: bubble-float 6s ease-in-out infinite;
+}
+
+.idle-bubbles span:nth-child(odd)  { animation-delay: 0s; }
+.idle-bubbles span:nth-child(even) { animation-delay: 3s; }
+
+@keyframes bubble-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+/* ============================================================
+   Hero result layer
+   ============================================================ */
+#layer-result {
+  background: radial-gradient(
+    ellipse at 30% 50%,
+    color-mix(in srgb, var(--hero-color) 15%, var(--dark)) 0%,
+    var(--dark) 65%
+  );
+}
+
+.result-wrap {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  padding: 5vh 6vw;
+  gap: 6vw;
+}
+
+/* ── Left: portrait ── */
+.result-left {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-frame {
+  --size: min(44vh, 44vw);
+  width:  var(--size);
+  height: var(--size);
+  border-radius: 32px;
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    0 0 0 3px var(--hero-color),
+    0 0 60px color-mix(in srgb, var(--hero-color) 50%, transparent),
+    0 32px 80px rgba(0,0,0,0.5);
+  animation: frame-in 700ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes frame-in {
+  from { opacity: 0; transform: scale(0.82) translateY(24px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+.hero-frame img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hero-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 6rem;
+  background: var(--dark-2);
+}
+
+/* ── Right: info ── */
+.result-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: info-in 700ms 200ms ease both;
+}
+
+@keyframes info-in {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.result-logo-svg svg {
+  height: 36px;
+  width: auto;
+  margin-bottom: 4px;
+}
+
+.hero-eyebrow {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hero-color);
+}
+
+.hero-dimension {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 18px;
+  border-radius: 100px;
+  background: color-mix(in srgb, var(--hero-color) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--hero-color) 35%, transparent);
+  color: var(--hero-color);
+  align-self: flex-start;
+}
+
+.hero-name {
+  font-family: var(--font-heading);
+  font-size: clamp(2.6rem, 5vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+}
+
+.hero-motto {
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-style: italic;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.4;
+  max-width: 680px;
+}
+
+.hero-desc {
+  font-size: clamp(0.9rem, 1.4vw, 1.1rem);
+  color: rgba(255,255,255,0.5);
+  max-width: 560px;
+  line-height: 1.6;
+}
+
+/* ── Countdown ── */
+.countdown-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.countdown-label {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.4);
+}
+
+.countdown-secs {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.7);
+  min-width: 2ch;
+  display: inline-block;
+}
+
+.countdown-track {
+  height: 5px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 3px;
+  overflow: hidden;
+  max-width: 440px;
+}
+
+.countdown-fill {
+  height: 100%;
+  background: var(--hero-color);
+  border-radius: 3px;
+  width: 100%;
+}
+
+/* ============================================================
+   SSE connection indicator
+   ============================================================ */
+.conn-dot {
+  position: fixed;
+  bottom: 16px;
+  right: 20px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  transition: background 400ms ease;
+  z-index: 100;
+}
+
+.conn-dot.connected {
+  background: #10B981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}

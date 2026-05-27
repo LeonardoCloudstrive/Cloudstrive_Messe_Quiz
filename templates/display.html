@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cloudstrive – KI-Verwaltungsheld Display</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/display.css" />
+</head>
+<body>
+
+  <!-- ── VIDEO / IDLE LAYER ─────────────────────────────── -->
+  <div class="layer" id="layer-video">
+
+    <video id="promo-video" autoplay loop muted playsinline>
+      <!--
+        Place your promo video at:  static/assets/promo.mp4
+        The fallback below is shown when no video file is found.
+      -->
+      <source src="/static/assets/promo.mp4" type="video/mp4" />
+    </video>
+
+    <!-- Shown when video file is absent or can't load -->
+    <div class="idle-fallback" id="idle-fallback">
+      <div class="idle-glow"></div>
+      <div class="idle-logo">
+        <div class="cs-logo-wrapper idle-logo-svg">{{ logo_svg | safe }}</div>
+      </div>
+      <h1 class="idle-headline">
+        Welcher<br>
+        <span class="idle-highlight">KI-Verwaltungsheld</span><br>
+        sind Sie?
+      </h1>
+      <p class="idle-sub">Machen Sie den Quiz am Tablet</p>
+      <div class="idle-bubbles">
+        <span>🚀 KI-Pionier:in</span>
+        <span>🛡️ Compliance-Wächter:in</span>
+        <span>✨ Automatisierungs-Magier:in</span>
+        <span>🔍 Daten-Detektiv:in</span>
+        <span>⚡ Transformations-Leader:in</span>
+        <span>🤝 Change-Coach:in</span>
+        <span>🏗️ Prozess-Architekt:in</span>
+        <span>🌟 Allrounder-Held:in</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── HERO RESULT LAYER ──────────────────────────────── -->
+  <div class="layer" id="layer-result">
+
+    <div class="result-wrap">
+
+      <!-- Left: hero portrait -->
+      <div class="result-left">
+        <div class="hero-frame" id="hero-frame">
+          <img id="hero-img" src="" alt="Ihr Heldenbild" />
+          <div class="hero-placeholder" id="hero-placeholder">
+            <span id="hero-placeholder-icon">⭐</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: info panel -->
+      <div class="result-right">
+
+        <div class="result-logo">
+          <div class="cs-logo-wrapper result-logo-svg">{{ logo_svg | safe }}</div>
+        </div>
+
+        <div class="hero-eyebrow" id="hero-eyebrow">Ihr Ergebnis</div>
+        <div class="hero-dimension" id="hero-dimension">Innovation</div>
+        <h1 class="hero-name" id="hero-name">Die KI-Pionierin</h1>
+        <p class="hero-motto" id="hero-motto"></p>
+        <p class="hero-desc" id="hero-desc"></p>
+
+        <div class="countdown-row">
+          <span class="countdown-label">Zurück in</span>
+          <span class="countdown-secs" id="countdown-secs">15</span>
+          <span class="countdown-label">s</span>
+        </div>
+        <div class="countdown-track">
+          <div class="countdown-fill" id="countdown-fill"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SSE connection indicator (small dot, top-left) -->
+  <div class="conn-dot" id="conn-dot" title="Display verbunden"></div>
+
+<script>
+/* ============================================================
+   Display Controller — SSE + layer switching
+   ============================================================ */
+
+const DISPLAY_DURATION = 15; // seconds
+
+const layerVideo  = document.getElementById('layer-video');
+const layerResult = document.getElementById('layer-result');
+const promoVideo  = document.getElementById('promo-video');
+const idleFallback = document.getElementById('idle-fallback');
+
+const heroImg     = document.getElementById('hero-img');
+const heroPlaceholder = document.getElementById('hero-placeholder');
+const heroPlaceholderIcon = document.getElementById('hero-placeholder-icon');
+const heroFrame   = document.getElementById('hero-frame');
+const heroDimension = document.getElementById('hero-dimension');
+const heroName    = document.getElementById('hero-name');
+const heroMotto   = document.getElementById('hero-motto');
+const heroDesc    = document.getElementById('hero-desc');
+const countdownFill = document.getElementById('countdown-fill');
+const countdownSecs = document.getElementById('countdown-secs');
+const connDot     = document.getElementById('conn-dot');
+
+const HERO_ICONS = {
+  pioneer: '🚀', architect: '🏗️', compliance: '🛡️',
+  coach: '🤝', magician: '✨', detective: '🔍',
+  leader: '⚡', allrounder: '🌟',
+};
+
+let returnTimer   = null;
+let tickInterval  = null;
+let secsRemaining = DISPLAY_DURATION;
+
+/* ── Video fallback ────────────────────────────────────── */
+promoVideo.addEventListener('error', () => {
+  promoVideo.style.display = 'none';
+  idleFallback.classList.add('visible');
+});
+promoVideo.addEventListener('canplay', () => {
+  idleFallback.classList.remove('visible');
+});
+// Show fallback immediately if no sources loaded
+window.addEventListener('load', () => {
+  if (promoVideo.readyState === 0) {
+    promoVideo.style.display = 'none';
+    idleFallback.classList.add('visible');
+  }
+});
+
+/* ── SSE connection ────────────────────────────────────── */
+function connectSSE() {
+  const es = new EventSource('/api/display-stream');
+
+  es.onopen = () => {
+    connDot.classList.add('connected');
+    connDot.title = 'Display verbunden';
+  };
+
+  es.onmessage = (evt) => {
+    try {
+      const data = JSON.parse(evt.data);
+      if (data.type === 'hero_result') showHero(data);
+    } catch (e) { /* keepalive comment, ignore */ }
+  };
+
+  es.onerror = () => {
+    connDot.classList.remove('connected');
+    connDot.title = 'Verbindung unterbrochen – wird neu verbunden…';
+    es.close();
+    // EventSource auto-reconnects, but we close + reopen manually for control
+    setTimeout(connectSSE, 3000);
+  };
+}
+
+connectSSE();
+
+/* ── Show hero result ──────────────────────────────────── */
+function showHero(data) {
+  const hero  = data.hero;
+  const color = hero.color || '#1E5AFF';
+  const icon  = HERO_ICONS[hero.type] || '⭐';
+
+  // Apply hero accent color as CSS variable
+  document.documentElement.style.setProperty('--hero-color', color);
+  heroFrame.style.setProperty('--hero-color', color);
+
+  // Populate image
+  if (data.image) {
+    heroImg.src = data.image;
+    heroImg.style.display = 'block';
+    heroPlaceholder.style.display = 'none';
+  } else {
+    heroImg.style.display = 'none';
+    heroPlaceholderIcon.textContent = icon;
+    heroPlaceholder.style.display = 'flex';
+    heroPlaceholder.style.background = hero.bg_color || '#EBF1FF';
+  }
+
+  // Populate text
+  heroDimension.textContent = `${icon} ${hero.dimension}`;
+  heroName.textContent      = hero.name;
+  heroMotto.textContent     = `„${hero.motto}"`;
+  heroDesc.textContent      = hero.description;
+
+  // Switch layers
+  clearTimers();
+  layerVideo.classList.remove('active');
+  layerResult.classList.add('active');
+
+  // Pause video (saves resources while result is showing)
+  promoVideo.pause();
+
+  startCountdown(DISPLAY_DURATION);
+}
+
+/* ── Return to video ───────────────────────────────────── */
+function showVideo() {
+  layerResult.classList.remove('active');
+  layerVideo.classList.add('active');
+  promoVideo.play().catch(() => {}); // autoplay may need user gesture on first load
+}
+
+/* ── Countdown ─────────────────────────────────────────── */
+function startCountdown(secs) {
+  secsRemaining = secs;
+  countdownSecs.textContent = secsRemaining;
+
+  // Animate the bar via CSS transition
+  countdownFill.style.transition = 'none';
+  countdownFill.style.width = '100%';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      countdownFill.style.transition = `width ${secs}s linear`;
+      countdownFill.style.width = '0%';
+    });
+  });
+
+  // Tick the number down
+  tickInterval = setInterval(() => {
+    secsRemaining--;
+    countdownSecs.textContent = Math.max(0, secsRemaining);
+  }, 1000);
+
+  // Return to video when done
+  returnTimer = setTimeout(() => {
+    clearTimers();
+    showVideo();
+  }, secs * 1000);
+}
+
+function clearTimers() {
+  clearTimeout(returnTimer);
+  clearInterval(tickInterval);
+}
+
+/* Boot: show video layer */
+layerVideo.classList.add('active');
+</script>
+</body>
+</html>
