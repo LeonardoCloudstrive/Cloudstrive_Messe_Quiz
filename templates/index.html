@@ -162,14 +162,8 @@
       </div>
     </div>
 
-    <!-- Preview after capture -->
-    <div id="camera-preview-area" class="camera-viewport hidden" style="display:none">
-      <img id="camera-preview" alt="Ihr Foto" style="width:100%;height:100%;object-fit:cover;display:block;transform:scaleX(-1);" />
-      <div class="preview-badge">Foto bestätigen?</div>
-    </div>
-
     <!-- No camera fallback -->
-    <div id="no-camera-fallback" class="hidden" style="display:none;flex:1;margin:0 28px;background:var(--dark-2);border-radius:var(--radius-lg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;min-height:200px;">
+    <div id="no-camera-fallback" class="hidden" style="display:none;flex:1;margin:0 28px;background:var(--dark-2);border-radius:var(--radius-lg);flex-direction:column;align-items:center;justify-content:center;gap:16px;min-height:200px;">
       <span style="font-size:3rem">📷</span>
       <p style="color:var(--text-muted);text-align:center;padding:0 24px;font-size:0.9rem">Kein Kamerazugriff möglich.<br>Sie können den Quiz trotzdem fortsetzen.</p>
       <button class="btn btn-primary" id="btn-skip-fallback">Ohne Foto fortfahren</button>
@@ -177,17 +171,11 @@
 
     <canvas id="canvas-hidden"></canvas>
 
-    <!-- Capture controls -->
+    <!-- Camera controls -->
     <div id="camera-capture-controls" class="camera-controls">
       <button class="btn btn-secondary" onclick="App.showScreen('screen-form')">← Zurück</button>
       <button class="btn-capture" id="btn-capture" aria-label="Foto aufnehmen"></button>
       <button class="btn btn-ghost" id="btn-skip-photo" style="font-size:0.85rem">Überspringen</button>
-    </div>
-
-    <!-- Confirm controls (after capture) -->
-    <div id="camera-confirm-controls" class="camera-controls hidden" style="display:none">
-      <button class="btn btn-secondary" id="btn-retake">↩ Nochmal</button>
-      <button class="btn btn-primary btn-lg" id="btn-confirm-photo">Weiter → Held erstellen</button>
     </div>
   </div>
 

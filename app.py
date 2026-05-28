@@ -6,7 +6,6 @@ import base64
 import uuid
 import io
 import logging
-from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -36,8 +35,11 @@ _CSV_HEADERS = ["Timestamp", "Name", "Email", "Department", "Telephone", "Hero N
 _S3_CSV_KEY  = "leads.csv"
 
 
+_S3_BUCKET = os.getenv("S3_BUCKET_NAME", "cloudstrive-quiz-leads")
+
+
 def _save_lead_to_s3(lead: dict, hero: dict, scores: dict) -> None:
-    bucket = "cloudstrive-quiz-leads"
+    bucket = _S3_BUCKET
     if not bucket:
         logger.warning("S3_BUCKET_NAME not set — skipping S3 save")
         return
@@ -151,11 +153,10 @@ async def generate_hero(body: GenerateRequest):
     hero = get_hero_data(hero_type, gender)
 
     image_result: Optional[str] = None
-    if body.photo:
-        try:
-            image_result = _generate_hero_image(body.photo, hero_type, gender)
-        except Exception as exc:
-            logger.error("Image generation failed: %s", exc)
+    try:
+        image_result = _generate_hero_image(hero_type, gender)
+    except Exception as exc:
+        logger.error("Image generation failed: %s", exc)
 
     session_id = str(uuid.uuid4())
     _sessions[session_id] = {
@@ -247,31 +248,29 @@ def _load_logo_svg() -> str:
     svg = raw.replace('<?xml version="1.0" encoding="UTF-8"?>', "").strip()
     return svg.replace('width="2268" height="464"', 'viewBox="0 0 2268 464"')
 
-def _generate_hero_image(photo_b64: str, hero_type: str, gender: str) -> Optional[str]:
+def _generate_hero_image(hero_type: str, gender: str) -> Optional[str]:
     from hero_logic import build_image_prompt
 
-    raw = photo_b64.split(",", 1)[1] if "," in photo_b64 else photo_b64
     prompt = build_image_prompt(hero_type, gender)
-
     bedrock = boto3.client("bedrock-runtime", region_name="eu-west-1")
-    body = json.dumps({
-        "taskType": "IMAGE_VARIATION",
-        "imageVariationParams": {
-            "images": [raw],
+
+    request_body = json.dumps({
+        "taskType": "TEXT_IMAGE",
+        "textToImageParams": {
             "text": prompt,
-            "similarityStrength": 0.7,
         },
         "imageGenerationConfig": {
-            "numberOfImages": 1,
-            "height": 1024,
+            "cfgScale": 6.5,
+            "seed": 42,
             "width": 1024,
-            "cfgScale": 8.0,
+            "height": 1024,
+            "numberOfImages": 1,
         },
     })
 
     response = bedrock.invoke_model(
         modelId="amazon.nova-canvas-v1:0",
-        body=body,
+        body=request_body,
         contentType="application/json",
         accept="application/json",
     )
