@@ -21,7 +21,7 @@ from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel, EmailStr
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parent / ".env")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,19 @@ def _save_lead_to_s3(lead: dict, hero: dict, scores: dict) -> None:
         raw = resp["Body"].read().decode("utf-8")
         existing_rows = list(csv.reader(io.StringIO(raw)))
     except ClientError as exc:
-        if exc.response["Error"]["Code"] != "NoSuchKey":
+        code = exc.response["Error"]["Code"]
+        if code == "NoSuchKey":
+            pass  # first run — file doesn't exist yet
+        elif code == "AccessDenied":
+            # AWS returns AccessDenied (not NoSuchKey) when the key doesn't exist
+            # and the caller lacks s3:ListBucket. Treat as empty file and continue;
+            # the PutObject below will reveal if write access is also missing.
+            logger.warning(
+                "S3 GetObject access denied — assuming leads.csv doesn't exist yet. "
+                "Add s3:GetObject + s3:PutObject + s3:ListBucket to the IAM user for %s.",
+                bucket,
+            )
+        else:
             logger.error("S3 download failed: %s", exc)
             return
 
@@ -154,7 +166,7 @@ async def generate_hero(body: GenerateRequest):
 
     image_result: Optional[str] = None
     try:
-        image_result = _generate_hero_image(hero_type, gender)
+        image_result = _generate_hero_image(hero_type, gender, body.photo)
     except Exception as exc:
         logger.error("Image generation failed: %s", exc)
 
@@ -248,36 +260,47 @@ def _load_logo_svg() -> str:
     svg = raw.replace('<?xml version="1.0" encoding="UTF-8"?>', "").strip()
     return svg.replace('width="2268" height="464"', 'viewBox="0 0 2268 464"')
 
-def _generate_hero_image(hero_type: str, gender: str) -> Optional[str]:
+def _generate_hero_image(
+    hero_type: str, gender: str, photo_b64: Optional[str] = None
+) -> Optional[str]:
     from hero_logic import build_image_prompt
+    from google import genai
+    from google.genai import types
+
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise RuntimeError("GEMINI_API_KEY not set")
 
     prompt = build_image_prompt(hero_type, gender)
-    bedrock = boto3.client("bedrock-runtime", region_name="eu-west-1")
+    client = genai.Client(api_key=api_key)
 
-    request_body = json.dumps({
-        "taskType": "TEXT_IMAGE",
-        "textToImageParams": {
-            "text": prompt,
-        },
-        "imageGenerationConfig": {
-            "cfgScale": 6.5,
-            "seed": 42,
-            "width": 1024,
-            "height": 1024,
-            "numberOfImages": 1,
-        },
-    })
+    # Build parts: optional selfie first so the model uses it for likeness,
+    # then the text prompt describing the hero transformation.
+    parts: list = []
+    if photo_b64:
+        raw = photo_b64.split(",", 1)[1] if "," in photo_b64 else photo_b64
+        # Detect mime type from data-URI prefix (default jpeg from canvas)
+        mime = "image/jpeg"
+        if photo_b64.startswith("data:image/png"):
+            mime = "image/png"
+        parts.append(
+            types.Part.from_bytes(data=base64.b64decode(raw), mime_type=mime)
+        )
+    parts.append(types.Part.from_text(text=prompt))
 
-    response = bedrock.invoke_model(
-        modelId="amazon.nova-canvas-v1:0",
-        body=request_body,
-        contentType="application/json",
-        accept="application/json",
+    response = client.models.generate_content(
+        model="gemini-2.5-flash-image",
+        contents=parts,
+        config=types.GenerateContentConfig(
+            response_modalities=["IMAGE", "TEXT"],
+        ),
     )
-    result = json.loads(response["body"].read())
-    images = result.get("images", [])
-    if not images:
-        raise RuntimeError("Nova Canvas returned no images")
-    return f"data:image/png;base64,{images[0]}"
+
+    for part in response.candidates[0].content.parts:
+        if part.inline_data is not None:
+            img_b64 = base64.b64encode(part.inline_data.data).decode("utf-8")
+            return f"data:{part.inline_data.mime_type};base64,{img_b64}"
+
+    raise RuntimeError("Gemini returned no image in response")
 
 
