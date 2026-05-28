@@ -7,7 +7,7 @@
   <title>Welcher KI-Verwaltungsheld sind Sie? – Cloudstrive</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/css/style.css" />
 </head>
 <body>
@@ -62,11 +62,9 @@
     <div class="quiz-header">
       <div class="quiz-top-row">
         <span class="quiz-label">Ihr Persönlichkeits-Check</span>
-        <span class="question-counter" id="q-counter">Frage 1 von 7</span>
+        <span class="question-counter" id="q-counter">1 / 7</span>
       </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="q-progress" style="width:0%"></div>
-      </div>
+      <div class="progress-segments" id="progress-segments"></div>
     </div>
 
     <div class="quiz-body">
@@ -102,8 +100,13 @@
       </div>
 
       <div class="form-group">
-        <label for="f-institut">Institut / Organisation</label>
-        <input type="text" id="f-institut" placeholder="z.B. Fraunhofer-Institut XY" autocomplete="organization" />
+        <label for="f-telephone">Telefonnummer *</label>
+        <input type="tel" id="f-telephone" placeholder="+49 123 456 7890" autocomplete="tel" />
+      </div>
+
+      <div class="form-group">
+        <label for="f-department">Abteilung / Department</label>
+        <input type="text" id="f-department" placeholder="z.B. IT, Finanzen, Verwaltung" autocomplete="organization" />
       </div>
 
       <div class="form-group">

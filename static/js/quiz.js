@@ -47,6 +47,7 @@ const QuizModule = {
   start() {
     this.current = 0;
     this.values = new Array(QUESTIONS.length).fill(5);
+    this._initProgressSegments();
     this._render();
     this._bindButtons();
   },
@@ -58,9 +59,6 @@ const QuizModule = {
 
   _renderQuestion(idx) {
     const q = QUESTIONS[idx];
-
-    // Update header
-    document.getElementById('q-counter').textContent = `Frage ${idx + 1} von ${QUESTIONS.length}`;
 
     // Animate out previous card if exists
     const existing = document.querySelector('.question-card.active');
@@ -79,10 +77,7 @@ const QuizModule = {
     const pct = (val / 10) * 100;
 
     card.innerHTML = `
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
-        <div class="question-icon">${q.icon}</div>
-        <span class="question-number">Frage ${idx + 1} · ${_dimLabel(q.dimension)}</span>
-      </div>
+      <span class="question-number">${_dimLabel(q.dimension)}</span>
       <p class="question-text">${q.text}</p>
       <div class="slider-section">
         <div class="slider-labels">
@@ -90,6 +85,7 @@ const QuizModule = {
           <span class="slider-label">Stimme voll zu</span>
         </div>
         <div class="slider-wrapper">
+          <div class="slider-tooltip" id="q-tooltip">${val}</div>
           <input
             type="range"
             class="hero-slider"
@@ -99,41 +95,60 @@ const QuizModule = {
             id="q-slider"
           >
         </div>
-        <div class="slider-ticks">
-          ${Array.from({length: 11}, (_, i) => `<span>${i}</span>`).join('')}
-        </div>
-        <div class="current-value-display">
-          <div class="current-value-badge" id="q-value">${val}</div>
-        </div>
       </div>
     `;
 
     document.getElementById('question-viewport').appendChild(card);
 
-    // Trigger enter animation
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => card.classList.add('active'));
-    });
+    // Bind slider + tooltip
+    const slider  = card.querySelector('#q-slider');
+    const tooltip = card.querySelector('#q-tooltip');
 
-    // Bind slider
-    const slider = card.querySelector('#q-slider');
-    const badge = card.querySelector('#q-value');
+    const positionTooltip = () => {
+      const v      = parseInt(slider.value, 10);
+      const thumbW = 44;
+      const trackW = slider.offsetWidth;
+      tooltip.style.left = `${(v / 10) * (trackW - thumbW) + thumbW / 2}px`;
+      tooltip.textContent = v;
+    };
 
     slider.addEventListener('input', () => {
       const v = parseInt(slider.value, 10);
       this.values[idx] = v;
-      badge.textContent = v;
-      const p = (v / 10) * 100;
-      slider.style.setProperty('--pct', `${p}%`);
-      badge.style.transform = 'scale(1.15)';
-      clearTimeout(badge._t);
-      badge._t = setTimeout(() => { badge.style.transform = ''; }, 200);
+      slider.style.setProperty('--pct', `${(v / 10) * 100}%`);
+      positionTooltip();
+    });
+
+    // Trigger enter animation and set initial tooltip position
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        card.classList.add('active');
+        positionTooltip();
+      });
+    });
+  },
+
+  _initProgressSegments() {
+    const container = document.getElementById('progress-segments');
+    if (!container) return;
+    container.innerHTML = '';
+    QUESTIONS.forEach((_, i) => {
+      const seg = document.createElement('div');
+      seg.className = 'progress-segment';
+      seg.id = `prog-seg-${i}`;
+      container.appendChild(seg);
     });
   },
 
   _updateProgress() {
-    const pct = ((this.current) / QUESTIONS.length) * 100;
-    document.getElementById('q-progress').style.width = `${pct}%`;
+    document.getElementById('q-counter').textContent = `${this.current + 1} / ${QUESTIONS.length}`;
+    QUESTIONS.forEach((_, i) => {
+      const seg = document.getElementById(`prog-seg-${i}`);
+      if (!seg) return;
+      seg.className = 'progress-segment';
+      if (i < this.current) seg.classList.add('done');
+      else if (i === this.current) seg.classList.add('active');
+    });
   },
 
   _bindButtons() {
@@ -181,12 +196,8 @@ const QuizModule = {
     const back = document.getElementById('btn-q-back');
     const next = document.getElementById('btn-q-next');
     if (!back || !next) return;
-
-    back.textContent = this.current === 0 ? '← Zurück' : '← Zurück';
     next.textContent = this.current === QUESTIONS.length - 1 ? 'Weiter zum Formular →' : 'Weiter →';
-
-    const pct = ((this.current + 1) / QUESTIONS.length) * 100;
-    document.getElementById('q-progress').style.width = `${pct}%`;
+    this._updateProgress();
   },
 };
 

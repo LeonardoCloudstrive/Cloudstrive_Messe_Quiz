@@ -123,7 +123,7 @@ const FormModule = {
     this._bindGender();
     this._bindSubmit();
     // Reset form
-    ['f-name', 'f-email', 'f-institut'].forEach(id => {
+    ['f-name', 'f-email', 'f-telephone', 'f-department'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
@@ -153,19 +153,22 @@ const FormModule = {
     btn.parentNode.replaceChild(fresh, btn);
 
     fresh.addEventListener('click', () => {
-      const name  = document.getElementById('f-name')?.value.trim();
-      const email = document.getElementById('f-email')?.value.trim();
-      const gdpr  = document.getElementById('f-gdpr')?.checked;
+      const name      = document.getElementById('f-name')?.value.trim();
+      const email     = document.getElementById('f-email')?.value.trim();
+      const telephone = document.getElementById('f-telephone')?.value.trim();
+      const gdpr      = document.getElementById('f-gdpr')?.checked;
 
-      if (!name) { showToast('Bitte geben Sie Ihren Namen ein.'); return; }
-      if (!email || !email.includes('@')) { showToast('Bitte geben Sie eine gültige E-Mail-Adresse ein.'); return; }
-      if (!gdpr) { showToast('Bitte stimmen Sie der Datenschutzerklärung zu.'); return; }
+      if (!name)                           { showToast('Bitte geben Sie Ihren Namen ein.'); return; }
+      if (!email || !email.includes('@'))  { showToast('Bitte geben Sie eine gültige E-Mail-Adresse ein.'); return; }
+      if (!telephone)                      { showToast('Bitte geben Sie Ihre Telefonnummer ein.'); return; }
+      if (!gdpr)                           { showToast('Bitte stimmen Sie der Datenschutzerklärung zu.'); return; }
 
       App.state.lead = {
         ...App.state.lead,
         name,
         email,
-        institut: document.getElementById('f-institut')?.value.trim() || '',
+        telephone,
+        department: document.getElementById('f-department')?.value.trim() || '',
         gdpr_consent: gdpr,
       };
 

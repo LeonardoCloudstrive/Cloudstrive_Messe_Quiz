@@ -1,14 +1,18 @@
 import asyncio
+import csv
 import json
 import os
 import base64
 import uuid
 import io
 import logging
+from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+import boto3
+from botocore.exceptions import ClientError
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -17,11 +21,73 @@ from fastapi.requests import Request
 from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel, EmailStr
 from dotenv import load_dotenv
-import requests as http_requests
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# AWS helpers
+# ---------------------------------------------------------------------------
+
+
+_CSV_HEADERS = ["Timestamp", "Name", "Email", "Department", "Telephone", "Hero Name", "Scores"]
+_S3_CSV_KEY  = "leads.csv"
+
+
+def _save_lead_to_s3(lead: dict, hero: dict, scores: dict) -> None:
+    bucket = "cloudstrive-quiz-leads"
+    if not bucket:
+        logger.warning("S3_BUCKET_NAME not set — skipping S3 save")
+        return
+
+    s3 = boto3.client("s3", region_name="eu-west-1")
+
+    # Download existing CSV rows (or start fresh)
+    existing_rows: list[list] = []
+    try:
+        resp = s3.get_object(Bucket=bucket, Key=_S3_CSV_KEY)
+        raw = resp["Body"].read().decode("utf-8")
+        existing_rows = list(csv.reader(io.StringIO(raw)))
+    except ClientError as exc:
+        if exc.response["Error"]["Code"] != "NoSuchKey":
+            logger.error("S3 download failed: %s", exc)
+            return
+
+    # Build new row
+    new_row = [
+        datetime.utcnow().isoformat(),
+        lead.get("name", ""),
+        lead.get("email", ""),
+        lead.get("department", ""),
+        lead.get("telephone", ""),
+        hero.get("name", ""),
+        json.dumps(scores, ensure_ascii=False),
+    ]
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    if existing_rows:
+        writer.writerows(existing_rows)
+    else:
+        writer.writerow(_CSV_HEADERS)
+    writer.writerow(new_row)
+
+    try:
+        s3.put_object(
+            Bucket=bucket,
+            Key=_S3_CSV_KEY,
+            Body=buf.getvalue().encode("utf-8"),
+            ContentType="text/csv",
+        )
+        logger.info("Lead appended to s3://%s/%s", bucket, _S3_CSV_KEY)
+    except ClientError as exc:
+        logger.error("S3 upload failed: %s", exc)
+
+
+
+
 
 app = FastAPI(title="Cloudstrive Messe Quiz")
 
@@ -49,7 +115,8 @@ _display_queues: list[asyncio.Queue] = []
 class LeadData(BaseModel):
     name: str
     email: str
-    institut: Optional[str] = ""
+    department: Optional[str] = ""
+    telephone: Optional[str] = ""
     gender: Optional[str] = "neutral"
     gdpr_consent: bool = False
 
@@ -84,7 +151,7 @@ async def generate_hero(body: GenerateRequest):
     hero = get_hero_data(hero_type, gender)
 
     image_result: Optional[str] = None
-    if body.photo and os.getenv("OPENAI_API_KEY"):
+    if body.photo:
         try:
             image_result = _generate_hero_image(body.photo, hero_type, gender)
         except Exception as exc:
@@ -100,7 +167,7 @@ async def generate_hero(body: GenerateRequest):
     }
 
     if body.lead and body.lead.gdpr_consent and body.lead.email:
-        _save_lead(body.lead.model_dump(), hero)
+        _save_lead_to_s3(body.lead.model_dump(), hero, body.scores)
 
     # Push result to any connected TV display tabs
     _broadcast_to_displays({
@@ -181,54 +248,37 @@ def _load_logo_svg() -> str:
     return svg.replace('width="2268" height="464"', 'viewBox="0 0 2268 464"')
 
 def _generate_hero_image(photo_b64: str, hero_type: str, gender: str) -> Optional[str]:
-    from openai import OpenAI
     from hero_logic import build_image_prompt
 
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
     raw = photo_b64.split(",", 1)[1] if "," in photo_b64 else photo_b64
-    photo_bytes = base64.b64decode(raw)
-
     prompt = build_image_prompt(hero_type, gender)
 
-    response = client.images.edit(
-        model="gpt-image-1",
-        image=("photo.png", io.BytesIO(photo_bytes), "image/png"),
-        prompt=prompt,
-        n=1,
-        size="1024x1024",
+    bedrock = boto3.client("bedrock-runtime", region_name="eu-west-1")
+    body = json.dumps({
+        "taskType": "IMAGE_VARIATION",
+        "imageVariationParams": {
+            "images": [raw],
+            "text": prompt,
+            "similarityStrength": 0.7,
+        },
+        "imageGenerationConfig": {
+            "numberOfImages": 1,
+            "height": 1024,
+            "width": 1024,
+            "cfgScale": 8.0,
+        },
+    })
+
+    response = bedrock.invoke_model(
+        modelId="amazon.nova-canvas-v1:0",
+        body=body,
+        contentType="application/json",
+        accept="application/json",
     )
+    result = json.loads(response["body"].read())
+    images = result.get("images", [])
+    if not images:
+        raise RuntimeError("Nova Canvas returned no images")
+    return f"data:image/png;base64,{images[0]}"
 
-    item = response.data[0]
-    if getattr(item, "b64_json", None):
-        return f"data:image/png;base64,{item.b64_json}"
-    return getattr(item, "url", None)
 
-
-def _save_lead(lead: dict, hero: dict) -> None:
-    webhook_url = os.getenv("CRM_WEBHOOK_URL")
-    if not webhook_url:
-        logger.info("CRM_WEBHOOK_URL not set — skipping lead push")
-        return
-
-    name_parts = (lead.get("name") or "").split(" ", 1)
-    try:
-        http_requests.post(
-            webhook_url,
-            json={
-                "properties": {
-                    "firstname": name_parts[0],
-                    "lastname": name_parts[1] if len(name_parts) > 1 else "",
-                    "email": lead.get("email", ""),
-                    "company": lead.get("institut", ""),
-                    "lead_source": "Cloudstrive Messe Quiz 2026",
-                    "hero_type": hero.get("type", ""),
-                    "hero_name": hero.get("name", ""),
-                },
-                "timestamp": datetime.utcnow().isoformat(),
-                "source": "cloudstrive-messe-quiz",
-            },
-            timeout=10,
-        )
-    except Exception as exc:
-        logger.error("CRM webhook failed: %s", exc)
