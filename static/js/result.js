@@ -64,8 +64,12 @@ const ResultModule = {
   },
 
   _preparePrint(hero, imageDataUri) {
-    // Populate the hidden print postcard
-    const printImg = document.getElementById('print-hero-image');
+    // Apply hero color to print card
+    const printCard = document.getElementById('print-postcard');
+    if (printCard) printCard.style.setProperty('--hero-color', hero.color || '#1E5AFF');
+
+    const printImg  = document.getElementById('print-hero-image');
+    const printDim  = document.getElementById('print-hero-dimension');
     const printName = document.getElementById('print-hero-name');
     const printMotto = document.getElementById('print-hero-motto');
 
@@ -75,22 +79,24 @@ const ResultModule = {
         printImg.style.display = 'block';
       } else {
         printImg.style.display = 'none';
-        const parent = printImg.parentElement;
-        if (parent) {
-          parent.style.background = hero.bg_color || '#EBF1FF';
-          parent.style.display = 'flex';
-          parent.style.alignItems = 'center';
-          parent.style.justifyContent = 'center';
-          parent.style.fontSize = '5rem';
-          parent.innerHTML = HERO_ICONS[hero.type] || '⭐';
+        const frame = printImg.closest('.print-hero-frame');
+        if (frame) {
+          frame.style.background = '#112038';
+          frame.style.display = 'flex';
+          frame.style.alignItems = 'center';
+          frame.style.justifyContent = 'center';
+          frame.style.fontSize = '5rem';
+          const icon = document.createElement('span');
+          icon.textContent = HERO_ICONS[hero.type] || '⭐';
+          frame.appendChild(icon);
         }
       }
     }
 
-    if (printName) printName.textContent = hero.name;
+    if (printDim)  printDim.textContent  = `${HERO_ICONS[hero.type] || ''} ${hero.dimension}`;
+    if (printName) printName.textContent  = hero.name;
     if (printMotto) printMotto.textContent = `„${hero.motto}"`;
 
-    // Generate QR code
     this._renderQR('print-qr-container', 'https://cloudstrive.ai');
   },
 

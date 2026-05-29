@@ -1191,9 +1191,8 @@ p { line-height: 1.6; }
 }
 
 /* ============================================================
-   Print Layout — Postcard A6
+   Print Layout — Postcard A6 (Cloudstrive branded frame)
    ============================================================ */
-/* !important wins over #print-postcard { display: flex } (ID specificity) */
 .print-only { display: none !important; }
 
 @media print {
@@ -1208,7 +1207,8 @@ p { line-height: 1.6; }
     height: 148mm;
     margin: 0;
     padding: 0;
-    background: white;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
     flex-direction: column;
     overflow: hidden;
   }
@@ -1219,87 +1219,102 @@ p { line-height: 1.6; }
   }
 }
 
+/* Base card styles (also used for preview) */
 #print-postcard {
-  background: white;
+  --hero-color: #1E5AFF;
+  background: #0A1628;
+  color: white;
   width: 105mm;
   height: 148mm;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  border: 2px solid color-mix(in srgb, var(--hero-color) 60%, transparent);
+  border-radius: 6pt;
 }
 
-.print-image-area {
-  flex: 0 0 70%;
-  overflow: hidden;
+/* Image frame — fills ~65% of card */
+.print-hero-frame {
+  flex: 0 0 65%;
   position: relative;
+  overflow: hidden;
 }
 
-.print-image-area img {
+.print-hero-frame img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
 
-.print-content-area {
-  flex: 1;
-  padding: 6mm 6mm 0;
+/* Name + type overlay on image */
+.print-name-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 14mm 5mm 4mm;
+  background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 100%);
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 1mm;
+}
+
+.print-dimension {
+  font-size: 6pt;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hero-color);
 }
 
 .print-hero-name {
   font-family: var(--font-heading);
-  font-size: 16pt;
+  font-size: 18pt;
   font-weight: 700;
-  color: #0A1628;
+  color: white;
   line-height: 1;
-  margin-bottom: 3mm;
+}
+
+/* Motto body */
+.print-body {
+  flex: 1;
+  padding: 4mm 5mm 2mm;
+  display: flex;
+  align-items: center;
 }
 
 .print-motto {
-  font-size: 8pt;
+  font-size: 9pt;
   font-style: italic;
-  color: #6B7FA3;
+  color: rgba(255,255,255,0.75);
   line-height: 1.4;
 }
 
+/* Footer: logo + QR */
 .print-footer {
-  padding: 3mm 6mm 5mm;
+  padding: 3mm 5mm;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 0.5pt solid #D4E0FF;
-  gap: 4mm;
+  border-top: 0.5pt solid color-mix(in srgb, var(--hero-color) 35%, transparent);
+  background: rgba(0,0,0,0.3);
+  flex-shrink: 0;
 }
 
-.print-logo-text {
-  font-family: var(--font-heading);
-  font-size: 12pt;
-  font-weight: 700;
-  color: #1E5AFF;
-  letter-spacing: 0.02em;
+.print-logo-svg svg {
+  height: 14pt;
+  width: auto;
 }
 
 .print-qr {
-  width: 18mm;
-  height: 18mm;
+  width: 16mm;
+  height: 16mm;
   flex-shrink: 0;
 }
 
 .print-qr canvas,
 .print-qr img {
-  width: 100%;
-  height: 100%;
-}
-
-.print-tagline {
-  font-size: 6pt;
-  color: #6B7FA3;
-  line-height: 1.4;
-  flex: 1;
-  text-align: right;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 /* ============================================================
@@ -1321,6 +1336,33 @@ p { line-height: 1.6; }
 /* ============================================================
    Theme Toggle Button
    ============================================================ */
+/* TV display shortcut button */
+.tv-open-btn {
+  position: fixed;
+  top: 14px;
+  right: 70px; /* sits left of the theme toggle */
+  z-index: 200;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  border: 1.5px solid rgba(255,255,255,0.18);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  text-decoration: none;
+  transition: background 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+.tv-open-btn:hover { transform: scale(1.08); }
+
+html.light .tv-open-btn {
+  background: rgba(10, 22, 40, 0.07);
+  border-color: var(--border);
+}
+
 .theme-toggle {
   position: fixed;
   top: 14px;

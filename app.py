@@ -284,9 +284,23 @@ def _load_logo_svg() -> str:
     svg = raw.replace('<?xml version="1.0" encoding="UTF-8"?>', "").strip()
     return svg.replace('width="2268" height="464"', 'viewBox="0 0 2268 464"')
 
+_PLACEHOLDER_IMAGE = (
+    "data:image/svg+xml;base64,"
+    + __import__("base64").b64encode(
+        b'<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512">'
+        b'<rect width="512" height="512" fill="#1E3A5F"/>'
+        b'<text x="256" y="240" font-family="sans-serif" font-size="64" fill="#4A90E2" text-anchor="middle">&#x1F9B8;</text>'
+        b'<text x="256" y="310" font-family="sans-serif" font-size="18" fill="#8BACD4" text-anchor="middle">DEV MODE - no image</text>'
+        b'</svg>'
+    ).decode()
+)
+
 def _generate_hero_image(
     hero_type: str, gender: str, photo_b64: Optional[str] = None
 ) -> Optional[str]:
+    if os.getenv("DEV_MODE", "").lower() in ("1", "true", "yes"):
+        return _PLACEHOLDER_IMAGE
+
     from hero_logic import build_image_prompt
     from google import genai
     from google.genai import types

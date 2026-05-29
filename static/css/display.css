@@ -129,12 +129,12 @@ html, body {
 }
 
 /* ============================================================
-   Hero result layer
+   Hero result layer — centered poster card
    ============================================================ */
 #layer-result {
   background: radial-gradient(
-    ellipse at 30% 50%,
-    color-mix(in srgb, var(--hero-color) 15%, var(--dark)) 0%,
+    ellipse at 50% 40%,
+    color-mix(in srgb, var(--hero-color) 22%, var(--dark)) 0%,
     var(--dark) 65%
   );
 }
@@ -143,38 +143,41 @@ html, body {
   display: flex;
   height: 100%;
   align-items: center;
-  padding: 5vh 6vw;
-  gap: 6vw;
-}
-
-/* ── Left: portrait ── */
-.result-left {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
   justify-content: center;
 }
 
-.hero-frame {
-  --size: min(44vh, 44vw);
-  width:  var(--size);
-  height: var(--size);
-  border-radius: 32px;
+/* ── Centered branded poster card ── */
+.hero-card {
+  /* width = min of 44vw or 62vh so image stays square and fits vertically */
+  width: min(44vw, 62vh);
+  display: flex;
+  flex-direction: column;
+  border-radius: 28px;
   overflow: hidden;
-  position: relative;
+  background: var(--dark-2);
   box-shadow:
-    0 0 0 3px var(--hero-color),
-    0 0 60px color-mix(in srgb, var(--hero-color) 50%, transparent),
-    0 32px 80px rgba(0,0,0,0.5);
+    0 0 0 2px color-mix(in srgb, var(--hero-color) 65%, transparent),
+    0 0 0 10px color-mix(in srgb, var(--hero-color) 14%, transparent),
+    0 0 120px color-mix(in srgb, var(--hero-color) 50%, transparent),
+    0 50px 130px rgba(0,0,0,0.7);
   animation: frame-in 700ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 @keyframes frame-in {
-  from { opacity: 0; transform: scale(0.82) translateY(24px); }
+  from { opacity: 0; transform: scale(0.84) translateY(32px); }
   to   { opacity: 1; transform: scale(1)    translateY(0); }
 }
 
-.hero-frame img {
+/* Square image area */
+.hero-card-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.hero-card-image img {
   width: 100%; height: 100%;
   object-fit: cover;
   display: block;
@@ -190,107 +193,109 @@ html, body {
   background: var(--dark-2);
 }
 
-/* ── Right: info ── */
-.result-right {
-  flex: 1;
+/* Hero name + type overlay at bottom of image */
+.hero-card-name-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 60px 24px 20px;
+  background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 100%);
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  animation: info-in 700ms 200ms ease both;
+  gap: 5px;
 }
 
-@keyframes info-in {
-  from { opacity: 0; transform: translateX(40px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-
-.result-logo-svg svg {
-  height: 36px;
-  width: auto;
-  margin-bottom: 4px;
-}
-
-.hero-eyebrow {
-  font-size: 0.9rem;
+.hero-card-dimension {
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--hero-color);
 }
 
-.hero-dimension {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 8px 18px;
-  border-radius: 100px;
-  background: color-mix(in srgb, var(--hero-color) 18%, transparent);
-  border: 1px solid color-mix(in srgb, var(--hero-color) 35%, transparent);
-  color: var(--hero-color);
-  align-self: flex-start;
-}
-
-.hero-name {
+.hero-card-name {
   font-family: var(--font-heading);
-  font-size: clamp(2.6rem, 5vw, 4.5rem);
+  font-size: clamp(1.5rem, 3vw, 2.4rem);
   font-weight: 700;
-  line-height: 1;
   color: #fff;
+  line-height: 1.05;
+}
+
+/* Motto + description body */
+.hero-card-body {
+  padding: 18px 24px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .hero-motto {
-  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-size: clamp(0.9rem, 1.5vw, 1.15rem);
   font-style: italic;
-  color: rgba(255,255,255,0.7);
-  line-height: 1.4;
-  max-width: 680px;
+  color: rgba(255,255,255,0.82);
+  line-height: 1.45;
 }
 
 .hero-desc {
-  font-size: clamp(0.9rem, 1.4vw, 1.1rem);
-  color: rgba(255,255,255,0.5);
-  max-width: 560px;
-  line-height: 1.6;
+  font-size: clamp(0.78rem, 1.1vw, 0.9rem);
+  color: rgba(255,255,255,0.42);
+  line-height: 1.55;
 }
 
-/* ── Countdown ── */
+/* Footer: logo left, countdown right */
+.hero-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 22px;
+  background: color-mix(in srgb, var(--hero-color) 12%, var(--dark));
+  border-top: 1px solid color-mix(in srgb, var(--hero-color) 28%, transparent);
+  flex-shrink: 0;
+}
+
+.card-logo-svg svg {
+  height: 26px;
+  width: auto;
+}
+
+.hero-card-footer-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
 .countdown-row {
   display: flex;
   align-items: baseline;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 4px;
 }
 
 .countdown-label {
-  font-size: 0.9rem;
-  color: rgba(255,255,255,0.4);
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.35);
 }
 
 .countdown-secs {
   font-family: var(--font-heading);
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: rgba(255,255,255,0.7);
+  color: rgba(255,255,255,0.65);
   min-width: 2ch;
   display: inline-block;
 }
 
 .countdown-track {
-  height: 5px;
+  width: 110px;
+  height: 3px;
   background: rgba(255,255,255,0.12);
-  border-radius: 3px;
+  border-radius: 2px;
   overflow: hidden;
-  max-width: 440px;
 }
 
 .countdown-fill {
   height: 100%;
   background: var(--hero-color);
-  border-radius: 3px;
+  border-radius: 2px;
   width: 100%;
 }
 

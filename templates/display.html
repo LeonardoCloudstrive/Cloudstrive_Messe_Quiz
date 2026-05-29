@@ -53,36 +53,41 @@
 
     <div class="result-wrap">
 
-      <!-- Left: hero portrait -->
-      <div class="result-left">
-        <div class="hero-frame" id="hero-frame">
+      <!-- Centered branded poster card -->
+      <div class="hero-card" id="hero-frame">
+
+        <!-- Hero image (square, fills top of card) -->
+        <div class="hero-card-image">
           <img id="hero-img" src="" alt="Ihr Heldenbild" />
           <div class="hero-placeholder" id="hero-placeholder">
             <span id="hero-placeholder-icon">⭐</span>
           </div>
-        </div>
-      </div>
-
-      <!-- Right: info panel -->
-      <div class="result-right">
-
-        <div class="result-logo">
-          <div class="cs-logo-wrapper result-logo-svg">{{ logo_svg | safe }}</div>
+          <!-- Name + type overlay at bottom of image -->
+          <div class="hero-card-name-overlay">
+            <div class="hero-card-dimension" id="hero-dimension"></div>
+            <div class="hero-card-name" id="hero-name"></div>
+          </div>
         </div>
 
-        <div class="hero-eyebrow" id="hero-eyebrow">Ihr Ergebnis</div>
-        <div class="hero-dimension" id="hero-dimension">Innovation</div>
-        <h1 class="hero-name" id="hero-name">Die KI-Pionierin</h1>
-        <p class="hero-motto" id="hero-motto"></p>
-        <p class="hero-desc" id="hero-desc"></p>
-
-        <div class="countdown-row">
-          <span class="countdown-label">Zurück in</span>
-          <span class="countdown-secs" id="countdown-secs">15</span>
-          <span class="countdown-label">s</span>
+        <!-- Motto + description body -->
+        <div class="hero-card-body">
+          <p class="hero-motto" id="hero-motto"></p>
+          <p class="hero-desc" id="hero-desc"></p>
         </div>
-        <div class="countdown-track">
-          <div class="countdown-fill" id="countdown-fill"></div>
+
+        <!-- Footer: logo left, countdown right -->
+        <div class="hero-card-footer">
+          <div class="cs-logo-wrapper card-logo-svg">{{ logo_svg | safe }}</div>
+          <div class="hero-card-footer-right">
+            <div class="countdown-track">
+              <div class="countdown-fill" id="countdown-fill"></div>
+            </div>
+            <div class="countdown-row">
+              <span class="countdown-label">Zurück in</span>
+              <span class="countdown-secs" id="countdown-secs">15</span>
+              <span class="countdown-label">s</span>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -179,6 +184,9 @@ function showHero(data) {
   // Apply hero accent color as CSS variable
   document.documentElement.style.setProperty('--hero-color', color);
   heroFrame.style.setProperty('--hero-color', color);
+  heroFrame.style.removeProperty('animation'); // reset so it replays
+  void heroFrame.offsetWidth;                  // force reflow
+  heroFrame.style.animation = 'frame-in 700ms cubic-bezier(0.34,1.56,0.64,1) both';
 
   // Populate image
   if (data.image) {

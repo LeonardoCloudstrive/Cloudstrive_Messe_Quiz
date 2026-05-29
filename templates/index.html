@@ -256,21 +256,33 @@
      Hidden Print Postcard — only visible when printing
      ============================================================ -->
 <div id="print-postcard" class="print-only">
-  <div class="print-image-area">
+  <!-- Image with name overlay (Cloudstrive frame style) -->
+  <div class="print-hero-frame">
     <img id="print-hero-image" src="" alt="Ihr Heldenbild" />
+    <div class="print-name-overlay">
+      <div class="print-dimension" id="print-hero-dimension"></div>
+      <div class="print-hero-name" id="print-hero-name"></div>
+    </div>
   </div>
-  <div class="print-content-area">
-    <div class="print-hero-name" id="print-hero-name"></div>
-    <div class="print-motto" id="print-hero-motto"></div>
+  <!-- Motto body -->
+  <div class="print-body">
+    <p class="print-motto" id="print-hero-motto"></p>
   </div>
+  <!-- Footer: logo + QR -->
   <div class="print-footer">
-    <span class="print-logo-text">cloudstrive</span>
+    <div class="cs-logo-wrapper print-logo-svg">{{ logo_svg | safe }}</div>
     <div class="print-qr" id="print-qr-container"></div>
-    <p class="print-tagline">Ihr KI-Sparringspartner<br>für die Verwaltung von morgen.</p>
   </div>
 </div>
 
-<!-- Theme toggle button — always on top -->
+<!-- Theme toggle + TV display button — always on top -->
+<a href="/display" target="_blank" class="tv-open-btn" title="TV-Display in neuem Tab öffnen">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+    <rect x="2" y="3" width="20" height="14" rx="2"/>
+    <line x1="8" y1="21" x2="16" y2="21"/>
+    <line x1="12" y1="17" x2="12" y2="21"/>
+  </svg>
+</a>
 <button class="theme-toggle" id="theme-toggle" aria-label="Hell-/Dunkel-Modus wechseln">
   <span id="theme-icon">☀️</span>
 </button>
