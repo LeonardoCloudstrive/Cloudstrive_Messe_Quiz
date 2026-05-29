@@ -851,10 +851,12 @@ p { line-height: 1.6; }
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 48px 32px;
-  gap: 32px;
-  overflow: hidden;
+  padding: clamp(20px, 4vh, 48px) 32px;
+  gap: clamp(12px, 2.5vh, 32px);
+  overflow-x: hidden;
+  overflow-y: auto;
   position: relative;
+  -webkit-overflow-scrolling: touch;
 }
 
 #screen-loading::before {
@@ -876,14 +878,15 @@ p { line-height: 1.6; }
 
 .loading-orb-wrapper {
   position: relative;
-  width: 140px;
-  height: 140px;
+  width: clamp(80px, 13vh, 140px);
+  height: clamp(80px, 13vh, 140px);
   z-index: 1;
+  flex-shrink: 0;
 }
 
 .loading-orb {
-  width: 140px;
-  height: 140px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   background: conic-gradient(from 0deg, var(--primary), #7C3AED, #EA580C, var(--primary));
   animation: orb-spin 2s linear infinite;
@@ -893,21 +896,21 @@ p { line-height: 1.6; }
 .loading-orb::after {
   content: '';
   position: absolute;
-  inset: 6px;
+  inset: 5%;
   border-radius: 50%;
   background: var(--dark);
 }
 
 .loading-orb-inner {
   position: absolute;
-  inset: 18px;
+  inset: 13%;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, rgba(30, 90, 255, 0.8), var(--dark));
   z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: clamp(1rem, 2.5vh, 2rem);
   animation: orb-pulse 2s ease-in-out infinite;
 }
 
@@ -919,15 +922,17 @@ p { line-height: 1.6; }
 
 .loading-title {
   font-family: var(--font-heading);
-  font-size: 1.8rem;
+  font-size: clamp(1.3rem, 3vh, 1.8rem);
   font-weight: 700;
   z-index: 1;
+  line-height: 1.2;
 }
 
 .loading-subtitle {
   color: var(--text-muted);
-  font-size: 0.95rem;
+  font-size: clamp(0.8rem, 1.5vh, 0.95rem);
   z-index: 1;
+  margin-top: -8px;
 }
 
 .loading-dots {
@@ -955,7 +960,7 @@ p { line-height: 1.6; }
 .loading-steps {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: clamp(5px, 1vh, 10px);
   z-index: 1;
   width: 100%;
   max-width: 320px;

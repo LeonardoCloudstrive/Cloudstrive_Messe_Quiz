@@ -6,6 +6,7 @@ import base64
 import uuid
 import io
 import logging
+from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -21,6 +22,7 @@ from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel, EmailStr
 from dotenv import load_dotenv
 
+# Load .env for local development — on EC2 secrets come from SSM instead
 load_dotenv(Path(__file__).resolve().parent / ".env")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -29,6 +31,28 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # AWS helpers
 # ---------------------------------------------------------------------------
+
+
+def load_secrets() -> None:
+    """Fetch secrets from SSM Parameter Store (EC2/production).
+    Falls back silently so local .env keeps working for development.
+    """
+    try:
+        ssm = boto3.client("ssm", region_name="eu-west-1")
+        resp = ssm.get_parameter(
+            Name="/cloudstrive-quiz/GEMINI_API_KEY",
+            WithDecryption=True,
+        )
+        os.environ["GEMINI_API_KEY"] = resp["Parameter"]["Value"]
+        logger.info("GEMINI_API_KEY loaded from SSM Parameter Store")
+    except Exception as exc:
+        logger.warning("SSM unavailable, using .env fallback: %s", exc)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    load_secrets()
+    yield
 
 
 _CSV_HEADERS = ["Timestamp", "Name", "Email", "Department", "Telephone", "Hero Name", "Scores"]
@@ -103,7 +127,7 @@ def _save_lead_to_s3(lead: dict, hero: dict, scores: dict) -> None:
 
 
 
-app = FastAPI(title="Cloudstrive Messe Quiz")
+app = FastAPI(title="Cloudstrive Messe Quiz", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
