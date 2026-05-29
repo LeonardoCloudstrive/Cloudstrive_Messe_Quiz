@@ -227,8 +227,7 @@
     <div class="result-bg-glow" id="result-bg-glow"></div>
 
     <div class="result-header">
-      <p class="result-eyebrow">Ihr Ergebnis</p>
-      <p class="result-title">Herzlichen Glückwunsch!</p>
+      <p class="result-eyebrow">Ihr KI-Verwaltungsheld</p>
     </div>
 
     <div class="result-card">
@@ -245,8 +244,8 @@
     </div>
 
     <div class="result-actions">
-      <button class="btn btn-primary btn-xl btn-full" id="btn-print">🖨️ Postkarte drucken</button>
-      <button class="btn btn-secondary btn-full" id="btn-restart">↩ Neu starten</button>
+      <button class="btn btn-primary btn-xl btn-full" id="btn-print">Postkarte drucken</button>
+      <button class="btn btn-secondary btn-full" id="btn-restart">Neu starten</button>
     </div>
   </div>
 
@@ -256,15 +255,16 @@
      Hidden Print Postcard — only visible when printing
      ============================================================ -->
 <div id="print-postcard" class="print-only">
-  <!-- Image with name overlay (Cloudstrive frame style) -->
+  <!-- Image fills top portion of card -->
   <div class="print-hero-frame">
     <img id="print-hero-image" src="" alt="Ihr Heldenbild" />
-    <div class="print-name-overlay">
-      <div class="print-dimension" id="print-hero-dimension"></div>
-      <div class="print-hero-name" id="print-hero-name"></div>
-    </div>
   </div>
-  <!-- Motto body -->
+  <!-- Hero type + name below the image -->
+  <div class="print-name-section">
+    <div class="print-dimension" id="print-hero-dimension"></div>
+    <div class="print-hero-name" id="print-hero-name"></div>
+  </div>
+  <!-- Motto -->
   <div class="print-body">
     <p class="print-motto" id="print-hero-motto"></p>
   </div>

@@ -750,8 +750,8 @@ p { line-height: 1.6; }
 }
 
 .face-oval {
-  width: 180px;
-  height: 220px;
+  width: min(300px, 42vw);
+  height: min(380px, 53vw);
   border: 3px solid rgba(30, 90, 255, 0.7);
   border-radius: 50%;
   box-shadow: 0 0 0 2000px rgba(0,0,0,0.35);
@@ -1219,25 +1219,25 @@ p { line-height: 1.6; }
   }
 }
 
-/* Base card styles (also used for preview) */
+/* Base card — ink-friendly white background with brand accents */
 #print-postcard {
   --hero-color: #1E5AFF;
-  background: #0A1628;
-  color: white;
+  background: #ffffff;
+  color: #0A1628;
   width: 105mm;
   height: 148mm;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 2px solid color-mix(in srgb, var(--hero-color) 60%, transparent);
+  border: 2.5pt solid var(--hero-color);
   border-radius: 6pt;
 }
 
-/* Image frame — fills ~65% of card */
+/* Image fills top ~58% of card */
 .print-hero-frame {
-  flex: 0 0 65%;
-  position: relative;
+  flex: 0 0 58%;
   overflow: hidden;
+  border-bottom: 1.5pt solid var(--hero-color);
 }
 
 .print-hero-frame img {
@@ -1247,61 +1247,58 @@ p { line-height: 1.6; }
   display: block;
 }
 
-/* Name + type overlay on image */
-.print-name-overlay {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  padding: 14mm 5mm 4mm;
-  background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 100%);
-  display: flex;
-  flex-direction: column;
-  gap: 1mm;
+/* Hero type + name, clearly visible below image */
+.print-name-section {
+  padding: 3mm 5mm 1.5mm;
+  border-bottom: 0.5pt solid #E2E8F0;
+  flex-shrink: 0;
 }
 
 .print-dimension {
   font-size: 6pt;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--hero-color);
+  margin-bottom: 1mm;
 }
 
 .print-hero-name {
   font-family: var(--font-heading);
-  font-size: 18pt;
+  font-size: 15pt;
   font-weight: 700;
-  color: white;
-  line-height: 1;
+  color: #0A1628;
+  line-height: 1.1;
 }
 
-/* Motto body */
+/* Motto */
 .print-body {
   flex: 1;
-  padding: 4mm 5mm 2mm;
+  padding: 2.5mm 5mm;
   display: flex;
   align-items: center;
 }
 
 .print-motto {
-  font-size: 9pt;
+  font-size: 8.5pt;
   font-style: italic;
-  color: rgba(255,255,255,0.75);
-  line-height: 1.4;
+  color: #4A5568;
+  line-height: 1.45;
 }
 
-/* Footer: logo + QR */
+/* Footer: logo left, QR right */
 .print-footer {
-  padding: 3mm 5mm;
+  padding: 2.5mm 5mm;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 0.5pt solid color-mix(in srgb, var(--hero-color) 35%, transparent);
-  background: rgba(0,0,0,0.3);
+  border-top: 1pt solid #D4E0FF;
+  background: #F4F7FF;
   flex-shrink: 0;
 }
 
 .print-logo-svg svg {
-  height: 14pt;
+  height: 13pt;
   width: auto;
 }
 
@@ -1340,7 +1337,7 @@ p { line-height: 1.6; }
 .tv-open-btn {
   position: fixed;
   top: 14px;
-  right: 70px; /* sits left of the theme toggle */
+  left: 14px;
   z-index: 200;
   width: 44px;
   height: 44px;

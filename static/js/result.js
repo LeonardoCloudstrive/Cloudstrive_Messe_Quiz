@@ -22,7 +22,7 @@ const ResultModule = {
     // Dimension badge
     const badge = document.getElementById('result-dimension-badge');
     if (badge) {
-      badge.textContent = `${HERO_ICONS[hero.type] || '⭐'} ${hero.dimension}`;
+      badge.textContent = hero.dimension;
       badge.style.background = `${hero.color}22`;
       badge.style.color = hero.color;
       badge.style.borderColor = `${hero.color}44`;
@@ -81,19 +81,16 @@ const ResultModule = {
         printImg.style.display = 'none';
         const frame = printImg.closest('.print-hero-frame');
         if (frame) {
-          frame.style.background = '#112038';
+          frame.style.background = hero.bg_color || '#EBF1FF';
           frame.style.display = 'flex';
           frame.style.alignItems = 'center';
           frame.style.justifyContent = 'center';
           frame.style.fontSize = '5rem';
-          const icon = document.createElement('span');
-          icon.textContent = HERO_ICONS[hero.type] || '⭐';
-          frame.appendChild(icon);
         }
       }
     }
 
-    if (printDim)  printDim.textContent  = `${HERO_ICONS[hero.type] || ''} ${hero.dimension}`;
+    if (printDim)  printDim.textContent  = hero.dimension;
     if (printName) printName.textContent  = hero.name;
     if (printMotto) printMotto.textContent = `„${hero.motto}"`;
 

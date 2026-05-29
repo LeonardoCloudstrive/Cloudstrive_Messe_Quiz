@@ -13,7 +13,12 @@ const CameraModule = {
 
     try {
       this._stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 1280 } },
+        video: {
+          facingMode: 'user',
+          width:  { ideal: 1920 },
+          height: { ideal: 1080 },
+          advanced: [{ zoom: 1 }],   // request minimum zoom where supported
+        },
         audio: false,
       });
       video.srcObject = this._stream;
