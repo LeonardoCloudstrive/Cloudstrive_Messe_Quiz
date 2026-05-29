@@ -1199,6 +1199,9 @@ p { line-height: 1.6; }
   body * { visibility: hidden; }
   #print-postcard, #print-postcard * { visibility: visible; }
 
+  /* Force light theme for print — dark mode must not affect the card */
+  html { color-scheme: light !important; }
+
   #print-postcard {
     display: flex !important;
     position: fixed;
@@ -1211,7 +1214,16 @@ p { line-height: 1.6; }
     print-color-adjust: exact;
     flex-direction: column;
     overflow: hidden;
+    background: #ffffff !important;
+    color: #0A1628 !important;
   }
+
+  .print-name-section { background: #ffffff !important; }
+  .print-hero-name    { color: #0A1628 !important; }
+  .print-dimension    { /* color comes from --hero-color inline style, leave it */ }
+  .print-body         { background: #ffffff !important; }
+  .print-motto        { color: #4A5568 !important; }
+  .print-footer       { background: #F4F7FF !important; border-top-color: #D4E0FF !important; }
 
   @page {
     size: A6 portrait;
@@ -1300,6 +1312,8 @@ p { line-height: 1.6; }
 .print-logo-svg svg {
   height: 13pt;
   width: auto;
+  /* invert(1) turns white→black; hue-rotate(180deg) brings the blue dot back to its original hue */
+  filter: invert(1) hue-rotate(180deg);
 }
 
 .print-qr {
@@ -1335,10 +1349,10 @@ p { line-height: 1.6; }
    ============================================================ */
 /* TV display shortcut button */
 .tv-open-btn {
-  position: fixed;
+  position: absolute;
   top: 14px;
   left: 14px;
-  z-index: 200;
+  z-index: 10;
   width: 44px;
   height: 44px;
   border-radius: 50%;

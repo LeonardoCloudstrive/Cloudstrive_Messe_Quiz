@@ -18,6 +18,14 @@
        ============================================================ -->
   <div class="screen" id="screen-welcome">
 
+      <a href="/display" target="_blank" class="tv-open-btn" title="TV-Display in neuem Tab öffnen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+          <line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+      </a>
+
       <div class="welcome-logo">
         <div class="cs-logo-wrapper">
           {{ logo_svg | safe }}
@@ -275,14 +283,7 @@
   </div>
 </div>
 
-<!-- Theme toggle + TV display button — always on top -->
-<a href="/display" target="_blank" class="tv-open-btn" title="TV-Display in neuem Tab öffnen">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
-    <rect x="2" y="3" width="20" height="14" rx="2"/>
-    <line x1="8" y1="21" x2="16" y2="21"/>
-    <line x1="12" y1="17" x2="12" y2="21"/>
-  </svg>
-</a>
+<!-- Theme toggle — always on top -->
 <button class="theme-toggle" id="theme-toggle" aria-label="Hell-/Dunkel-Modus wechseln">
   <span id="theme-icon">☀️</span>
 </button>
